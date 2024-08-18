@@ -19,6 +19,6 @@ The `everything_presence_lite_map_chart.yaml` file defines a Lovelace card that 
 
 
 
-*Notes Based on the code of <a href="https://github.com/athua">athua</a> and <a href="https://github.com/smarthomejunkie">smarthomejunkie</a>*
+***Notes** Based on the code of <a href="https://github.com/athua">athua</a> and <a href="https://github.com/smarthomejunkie">smarthomejunkie</a>*
 
 
