@@ -42,10 +42,10 @@ layout:
       - 0
 entities:
   - entity: ''
-    fn_var1: $ex vars.sensor_id = "0dc18a34bf63e99799458e941e67e1c0";
-    fn_var2: $ex vars.sensor_name_prefix = "sensor.everything_presence_lite_f1cb54_";
-    fn_var3: $ex vars.number_name_prefix = "number.everything_presence_lite_f1cb54_";
-    fn_var4: $ex vars.is_inch_unit = false;
+  #change sensor name here
+    fn_var1: $ex vars.sensor_name_prefix = "sensor.everything_presence_lite_f1cb54_";
+    fn_var2: $ex vars.number_name_prefix = "number.everything_presence_lite_f1cb54_";
+    fn_var3: $ex vars.is_inch_unit = false;
   - entity: ''
     name: Target1
     marker:
@@ -128,6 +128,7 @@ entities:
       - $ex hass.states[vars.number_name_prefix + "zone_1_end_y"].state
       - $ex hass.states[vars.number_name_prefix + "zone_1_begin_y"].state
       - $ex hass.states[vars.number_name_prefix + "zone_1_begin_y"].state
+#Remove Zone2 if not in use
   - entity: ''
     name: Zone2
     mode: lines
@@ -149,6 +150,7 @@ entities:
       - $ex hass.states[vars.number_name_prefix + "zone_2_end_y"].state
       - $ex hass.states[vars.number_name_prefix + "zone_2_begin_y"].state
       - $ex hass.states[vars.number_name_prefix + "zone_2_begin_y"].state
+#Remove Zone3 if not in use
   - entity: ''
     name: Zone3
     mode: lines
