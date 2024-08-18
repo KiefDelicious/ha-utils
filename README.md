@@ -1,4 +1,4 @@
-## Home Assistant Plotly Graph Card mmWave Zones Lovelace Card
+## Home Assistant Plotly Graph Card Lovelace Card for Everything Presence Lite
 
 This repository contains a custom Home Assistant Lovelace card for visualizing zones and presence of up to 3 targets. 
 
