@@ -1,5 +1,3 @@
-# The following code for a lovelace card requires installation of the Plotly Graph Card from HACS in Home Assistant.
-# To use this card, add a manual lovelace card and paste the follow code in ensuring to replace the sensor names (fn_var1 & fn_var2) with your sensor's name.
 type: custom:plotly-graph
 refresh_interval: 1
 hours_to_show: current_day
