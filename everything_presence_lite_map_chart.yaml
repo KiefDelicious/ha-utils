@@ -41,8 +41,8 @@ layout:
 entities:
   - entity: ''
   #change sensor name here
-    fn_var1: $ex vars.sensor_name_prefix = "sensor.everything_presence_lite_f1cb54_";
-    fn_var2: $ex vars.number_name_prefix = "number.everything_presence_lite_f1cb54_";
+    fn_var1: $ex vars.sensor_name_prefix = "sensor.everything_presence_lite_name_";
+    fn_var2: $ex vars.number_name_prefix = "number.everything_presence_lite_name_";
     fn_var3: $ex vars.is_inch_unit = false;
   - entity: ''
     name: Target1
