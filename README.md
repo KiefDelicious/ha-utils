@@ -21,4 +21,7 @@ The `everything_presence_lite_map_chart.yaml` file defines a Lovelace card that 
 
 ***Notes** Based on the code of <a href="https://github.com/athua">athua</a> and <a href="https://github.com/smarthomejunkie">smarthomejunkie</a>*
 
+As an addition with the help of [iamwyza](https://github.com/iamwyza) I've added the `everything_presence_lite_map_chart-rotation-support.yaml`. This does the same as `everything_presence_lite_map_chart.yaml`, but allows for grid rotation, making it easier to place sensors in corners).
+
+
 
