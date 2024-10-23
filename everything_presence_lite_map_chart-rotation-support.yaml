@@ -1,0 +1,245 @@
+type: custom:plotly-graph
+refresh_interval: 1
+hours_to_show: current_day
+config:
+  modeBarButtonsToRemove:
+    - select2d
+    - lasso2d
+    - toImage
+  displaylogo: false
+layout:
+  height: 240
+  margin:
+    l: 40
+    r: 20
+    t: 20
+    b: 55
+  showlegend: true
+  xaxis:
+    showticklabels: true
+    dtick: 1000
+    visible: true
+    gridcolor: RGBA(200,200,200,0.15)
+    zerolinecolor: RGBA(200,200,200,0.15)
+    type: number
+    fixedrange: true
+    range:
+      - -4000
+      - 4000
+  yaxis:
+    showticklabels: true
+    dtick: 1000
+    visible: true
+    gridcolor: RGBA(200,200,200,0.15)
+    zerolinecolor: RGBA(200,200,200,0.15)
+    scaleanchor: x
+    scaleratio: 1
+    fixedrange: true
+    range:
+      - 7500
+      - -7500
+entities:
+  - entity: ''
+    # This needs to be unique per plotly-graph instance on a given page.
+    # If you're doing dev work on the globalSetup function, you probably need to change it while editing since it'll conflict with the actual one running that is on the page itself.
+    fn_var0: $ex vars.instanceId = 1; 
+    fn_var1: $ex vars.sensor_name_prefix = "sensor.everything_presence_lite_bed333_";
+    fn_var2: $ex vars.number_name_prefix = "number.everything_presence_lite_bed333_";
+    fn_var3: $ex vars.is_inch_unit = true;
+    fn_var4: $ex vars.rotation = 0; #in Degrees out of 360
+    fn_var5: $ex vars.zones = [1,2,3];
+    fn_var6: $ex vars.cache = {};
+    fn_var7: $ex vars.disableCache = false; # the cache logic still runs, but it redoes everything every time as if the cache was always invalid
+
+    # Sets up some global functions once along with a cache of certain things like the zones and detection area as we really only need to calculate these once.
+    fn_globalSetup: $ex {
+      if (window.plotlyGraphCache !== undefined && window.plotlyGraphCache[vars.instanceId] !== undefined) {
+        var cache = window.plotlyGraphCache[vars.instanceId];
+        if (vars.sensor_name_prefix == cache.sensor_name_prefix 
+            && vars.number_name_prefix == cache.number_name_prefix
+            && vars.is_inch_unit == cache.is_inch_unit
+            && vars.rotation == cache.rotation_base
+            && vars.zones.length == cache.zones.length
+            && !vars.disableCache) {
+              vars.cache = cache;
+              return;
+            }
+
+        vars.cache = {};
+        window.plotlyGraphCache[vars.instanceId] = {};
+      }
+
+      if (window.plotlyGraphCache === undefined)
+        window.plotlyGraphCache = {};
+
+      var rotation = (vars.rotation/360) * (Math.PI*2);
+
+      var cache = {
+        sensor_name_prefix:vars.sensor_name_prefix,
+        number_name_prefix:vars.number_name_prefix,
+        rotation_base:vars.rotation,
+        rotation:rotation,
+        zones:vars.zones,
+        is_inch_unit:vars.is_inch_unit,
+        zoneCache:[],
+        areaCache:{}
+      };
+      
+      cache.rotate = (x,y) => {
+        if (cache.rotation != 0) { 
+              var currentX = x;
+              var currentY = y;
+              
+              x = (currentX * Math.cos(cache.rotation)) - (currentY * Math.sin(cache.rotation));
+              y = (currentX * Math.sin(cache.rotation)) + (currentY * Math.cos(cache.rotation));
+        }
+
+        return {x,y};
+      };
+
+      cache.getTarget = (targetNumber, plane) => {
+          var x = hass.states[vars.sensor_name_prefix + "target_" + targetNumber + "_x"].state;
+          var y = hass.states[vars.sensor_name_prefix + "target_" + targetNumber + "_y"].state; 
+          if (x == 0 && y == 0) { return -9999 }; 
+          if (vars.is_inch_unit) { 
+            x = x * 25.4; 
+            y = y * 25.4; 
+          }
+          return [vars.cache.rotate(x,y)[plane]]; 
+      };
+
+
+      cache.zones.forEach(zone => {
+        var prefix = cache.number_name_prefix + "zone_" + zone + "_";
+
+        if (hass.states[prefix + "begin_x"] === undefined) {
+          cache.zoneCache[zone] = { x:[], y:[] };
+          return;
+        }
+        
+        var beginX = hass.states[prefix + "begin_x"].state;
+        var endX = hass.states[prefix + "end_x"].state;
+        var beginY = hass.states[prefix + "begin_y"].state;
+        var endY = hass.states[prefix + "end_y"].state;
+      
+        var coords = [ 
+          cache.rotate(beginX, beginY),
+          cache.rotate(beginX, endY),
+          cache.rotate(endX, endY),
+          cache.rotate(endX, beginY),
+          cache.rotate(beginX, beginY)
+        ];
+
+        cache.zoneCache[zone] = {};
+        cache.zoneCache[zone].x = coords.map(coord => coord.x);
+        cache.zoneCache[zone].y = coords.map(coord => coord.y);
+      });
+
+
+      var baseAreaPoints = [
+             [0, 0 ],
+             [7500 * Math.sin((2 * Math.PI)/360 * 60), 7500 * Math.cos((2 * Math.PI)/360 * 60) ],
+             [6500, Math.sqrt( 7500**2 - 6500**2 ) ],
+             [5500, Math.sqrt( 7500**2 - 5500**2 ) ],
+             [4500, Math.sqrt( 7500**2 - 4500**2 ) ],
+             [4000, Math.sqrt( 7500**2 - 4000**2 ) ],
+             [3000, Math.sqrt( 7500**2 - 3000**2 ) ],
+             [2000, Math.sqrt( 7500**2 - 2000**2 ) ],
+             [1000, Math.sqrt( 7500**2 - 1000**2 ) ],
+             [0, 7500 ],
+             [-1000, Math.sqrt( 7500**2 - 1000**2 )],
+             [-2000, Math.sqrt( 7500**2 - 2000**2 )],
+             [-3000, Math.sqrt( 7500**2 - 3000**2 )],
+             [-4000, Math.sqrt( 7500**2 - 4000**2 )],
+             [-4500, Math.sqrt( 7500**2 - 4500**2 )],
+             [-5500, Math.sqrt( 7500**2 - 5500**2 )],
+             [-6500, Math.sqrt( 7500**2 - 6500**2 )],
+             [-7500 * Math.sin((2 * Math.PI)/360 * 60), 7500 * Math.cos((2 * Math.PI)/360 * 60)],
+             [0, 0]
+        ];
+
+      
+        cache.areaCache.x = baseAreaPoints.map(coord => cache.rotate(coord[0],coord[1]).x );
+        cache.areaCache.y = baseAreaPoints.map(coord => cache.rotate(coord[0],coord[1]).y );
+  
+        window.plotlyGraphCache[vars.instanceId] = cache;
+        vars.cache = cache;
+      };
+  - entity: ''
+    name: Target1
+    marker:
+      size: 10
+      symbol: star-diamond
+    line:
+      shape: spline
+      width: 5
+    x: $ex vars.cache.getTarget(1, "x"); 
+    y: $ex vars.cache.getTarget(1, "y");
+  - entity: ''
+    name: Target2
+    marker:
+      size: 10
+      symbol: star-diamond
+    line:
+      shape: spline
+      width: 5
+    x: $ex vars.cache.getTarget(2, "x"); 
+    y: $ex vars.cache.getTarget(2, "y");
+  - entity: ''
+    internal: false
+    name: Target3
+    marker:
+      size: 10
+      symbol: star-diamond
+    line:
+      shape: spline
+      width: 5
+    x: $ex vars.cache.getTarget(3, "x"); 
+    y: $ex vars.cache.getTarget(3, "y");
+  - entity: ''
+    name: Zone1
+    mode: lines
+    fill: toself
+    fillcolor: RGBA(20,200,0,0.06)
+    line:
+      color: RGBA(20,200,0,0.2)
+      shape: line
+      width: 2
+    x: $ex vars.cache.zoneCache[1].x
+    y: $ex vars.cache.zoneCache[1].y
+  - entity: ''
+    name: Zone2
+    mode: lines
+    fill: toself
+    fillcolor: RGBA(200,20,0,0.06)
+    line:
+      color: RGBA(200,20,0,0.2)
+      shape: line
+      width: 2
+    x: $ex vars.cache.zoneCache[2].x
+    y: $ex vars.cache.zoneCache[2].y
+  - entity: ''
+    name: Zone3
+    mode: lines
+    fill: toself
+    fillcolor: RGBA(600,350,0,0.06)
+    line:
+      color: RGBA(600,350,0,0.2)
+      shape: line
+      width: 2
+    x: $ex vars.cache.zoneCache[3].x
+    y: $ex vars.cache.zoneCache[3].y
+  - entity: ''
+    name: Coverage
+    mode: lines
+    fill: tonexty
+    fillcolor: rgba(168, 216, 234, 0.15)
+    hoverinfo: none
+    line:
+      shape: line
+      width: 0.7
+      dash: dot
+    x: $ex vars.cache.areaCache.x
+    y: $ex vars.cache.areaCache.y
+raw_plotly_config: true
+title: Family Room Presence Map
