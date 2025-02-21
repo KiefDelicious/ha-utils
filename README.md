@@ -10,7 +10,7 @@ The `everything_presence_lite_map_chart.yaml` file defines a Lovelace card that 
 
 1.  **Install Plotly Graph Card:** This card requires the <a href="https://github.com/dbuezas/lovelace-plotly-graph-card">Lovelace Plotly Graph Card</a> from HACS in Home Assistant.
 2.  **Copy & Paste Code:** Add a manual lovelace card to your dashboard and copy content of the <a href="https://github.com/KiefDelicious/ha-utils/blob/main/everything_presence_lite_map_chart.yaml">everything_presence_lite_map_chart.yaml</a>
-3.  **Replace Sensor Names:** Ensure to replace the placeholder of 2 sensor names (`everything_presence_lite_name`) with the actual names of your sensors in Home Assistant.
+3.  **Replace Sensor Names:** Ensure to replace the placeholder of 2 sensor names (`everything_presence_lite_XXX`) with the actual names of your sensors in Home Assistant.
 4.  **Optional:** Remove zones that are not used to avoid error message
 
 **Image Example:**
